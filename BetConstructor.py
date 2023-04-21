@@ -1,7 +1,7 @@
 
 from attr import dataclass
 import math
-SPREAD = 0.12
+SPREAD = 0.05
 SACRIFICE = 10000
 POWER = 1
 BIAS = 0.5
@@ -20,13 +20,13 @@ def calculatePromisedRate(coefficient):
 
 
 def calculateCoefficient(proportion):
-    x = proportion**(0.25)
-    m = 1 - (1/(POWER+1))
-    b = 1 / (2 * (POWER + 1))
-    return m * x + b
-    # a = 1 - math.exp(-1 * POWER * (proportion + POWER))
-    # b = 1 + math.exp(-1 * POWER * (proportion - BIAS))
-    # return a / b
+    # x = proportion**(0.25)
+    # m = 1 - (1/(POWER+1))
+    # b = 1 / (2 * (POWER + 1))
+    # return m * x + b
+    a = 1 - math.exp(-1 * POWER * (proportion + POWER))
+    b = 1 + math.exp(-1 * POWER * (proportion - BIAS))
+    return a / b
 
 
 class BetConstructor():
@@ -87,7 +87,7 @@ class BetConstructor():
 
 
 if __name__ == "__main__":
-    bet_constructor = BetConstructor()
+    bet_constructor = BetConstructor(options=["1", "2"])
     bet_constructor.printPayouts()
 
     bet_constructor.placeBet("A", "1", 1000)
