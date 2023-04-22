@@ -1,7 +1,9 @@
 
+import random
 from attr import dataclass
 import math
-SPREAD = 0.05
+
+SPREAD = 0.16
 SACRIFICE = 10000
 POWER = 1
 BIAS = 0.5
@@ -20,13 +22,13 @@ def calculatePromisedRate(coefficient):
 
 
 def calculateCoefficient(proportion):
-    # x = proportion**(0.25)
-    # m = 1 - (1/(POWER+1))
-    # b = 1 / (2 * (POWER + 1))
-    # return m * x + b
-    a = 1 - math.exp(-1 * POWER * (proportion + POWER))
-    b = 1 + math.exp(-1 * POWER * (proportion - BIAS))
-    return a / b
+    x = proportion**(0.25)
+    m = 1 - (1/(POWER+1))
+    b = 1 / (2 * (POWER + 1))
+    return m * x + b
+    # a = 1 - math.exp(-1 * POWER * (proportion + POWER))
+    # b = 1 + math.exp(-1 * POWER * (proportion - BIAS))
+    # return a / b
 
 
 class BetConstructor():
@@ -41,13 +43,13 @@ class BetConstructor():
         # What if analysis to find how much of sacrifice we can have
         collected = self.collected
         total_amount_bet = sum(
-            [bet.amount*bet.promisedRate for bet in self.bets])
+            [math.log1p(bet.amount*bet.promisedRate) for bet in self.bets])
         amount_bet_on_each_option = [0] * len(self.options)
 
         for bet in self.bets:
             option_index = self.options.index(bet.option)
-            amount_bet_on_each_option[option_index] += bet.amount * \
-                bet.promisedRate
+            amount_bet_on_each_option[option_index] += math.log1p(bet.amount *
+                                                                  bet.promisedRate)
 
         for i, option in enumerate(self.options):
             percentage_of_total_bet_on_option = amount_bet_on_each_option[i] / \
@@ -81,7 +83,7 @@ class BetConstructor():
         self.bets.append(newBet)
         self.collected += amount
         global POWER
-        POWER += self.collected * 10 / SACRIFICE
+        POWER += 1
         self.updateCoefficients()
         return self.bets
 
@@ -89,16 +91,9 @@ class BetConstructor():
 if __name__ == "__main__":
     bet_constructor = BetConstructor(options=["1", "2"])
     bet_constructor.printPayouts()
-
-    bet_constructor.placeBet("A", "1", 1000)
-    bet_constructor.printPayouts()
-    bet_constructor.placeBet("B", "2", 300)
-    bet_constructor.printPayouts()
-    bet_constructor.placeBet("C", "1", 700)
-    bet_constructor.printPayouts()
-    bet_constructor.placeBet("D", "2", 1000)
-    bet_constructor.printPayouts()
-    bet_constructor.placeBet("C", "1", 700)
-    bet_constructor.printPayouts()
-    bet_constructor.placeBet("E", "2", 1500)
-    bet_constructor.printPayouts()
+    for i in range(10):
+        option = random.choice(["1", "2"])
+        amount = random.randrange(1, 1200)
+        print(f"Placing bet {i} on {option} for {amount}")
+        bet_constructor.placeBet(f"id_{i}", option, amount)
+        bet_constructor.printPayouts()
